@@ -9,161 +9,182 @@
                 color: #333;
                 background: #fcfeff;
             }
-
+ 
             div {
                 width: min(95%, 700px);
                 margin: 0 auto;
             }
-
+ 
             header {
                 text-align: center;
             }
-
+ 
             header svg {
                 width: 75%;
             }
-
+ 
             h1 {
                 font-size: 2rem;
                 font-weight: 200;
             }
-             h2 {
+ 
+            h2 {
                 font-size: 2rem;
                 font-weight: 200;
             }
-
+ 
             p {
                 margin: 0.9rem 0.3rem;
             }
-
+ 
             footer {
                 border-top: 1px solid #eee;
                 margin-top: 3rem;
                 padding-bottom: 3rem;
             }
-
         </style>
     </head>
     <body>
         <div>
-
+ 
             <header>
-                <!-- Ícono SVG del iceberg -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none" stroke="#111" stroke-width="2">
                     <polygon points="200,20 250,100 300,150 250,350 200,380 125,275 90,200 100,125 180,25" />
                     <line x1="10" y1="100" x2="390" y2="100" />
                 </svg>
-
+ 
                 <h1>TITANIC v/s ICEBERG</h1>
             </header>
-
+ 
             <main>
-                <!-- El número de pasajeros se escribe aquí con JavaScript -->
-                <p>Usaremos datos disponibles en línea. Con ellos visualizaremos el destino de las 1316 personas a bordo del Titanic, divididas en tres clases:</p>
-
-                <!-- El gráfico de barras se dibuja aquí con JavaScript -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1316 150">
+                <p>Usaremos datos disponibles en línea. Con ellos visualizaremos el destino de las <span id="total"></span> personas a bordo del Titanic, divididas en tres clases:</p>
+ 
+                <h2>Pasajeros por clase</h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 892 150">
                     <g id="grafico"></g>
-                    </svg>  
-
-                 <h2>Sobrevivientes y fallecidos por clase</h2>
-                <p>Primera clase</p>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 80">
+                </svg>
+ 
+                <h2>Sobrevivientes y fallecidos por clase</h2>
+ 
+                <h3>Primera clase</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 892 150">
                     <g id="grafico2"></g>
-                     </svg> 
-
-                <p>Segunda clase</p> 
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 80">
+                </svg>
+ 
+                <h3>Segunda clase</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 892 150">
                     <g id="grafico3"></g>
-                     </svg>  
-
-                <p>Tercera clase</p>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 80">
+                </svg>
+ 
+                <h3>Tercera clase</h3>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 892 150">
                     <g id="grafico4"></g>
-                    </svg>
+                </svg>
             </main>
-
+ 
             <footer>
                 <p>OPR — Rosi /ᐠ - ˕ -マ</p>
             </footer>
-
+ 
         </div>
-
-        <!-- Librería para leer archivos CSV -->
+ 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
+ 
         <script>
             // Contadores para cada clase de pasajero
-            var primera = 325;
-            var segunda = 285;
-            var tercera = 706;
-            var primera_vive = 202;
-            var primera_muere = 123;
-            var segunda_vive = 118;
-            var segunda_muere = 167
-            var tercera_vive = 178;
-            var tercera_muere = 528;
-
-            // Elementos del HTML donde escribiremos los resultados
-     
+            var primera = 0;
+            var segunda = 0;
+            var tercera = 0;
+ 
+            var primerosmuertos = 0;
+            var segundosmuertos = 0;
+            var tercerosmuertos = 0;
+ 
+            var spanTotal = document.querySelector("#total");
             var grafico   = document.querySelector("#grafico");
-
-            // Leemos el archivo CSV desde internet
+ 
             Papa.parse("https://raw.githubusercontent.com/datasciencedojo/datasets/refs/heads/master/titanic.csv", {
-                download: true,       // descarga el archivo
-                header: true,         // la primera fila son los nombres de columnas
-                dynamicTyping: true,  // convierte números automáticamente
-
+                download: true,
+                header: true,
+                dynamicTyping: true,
+ 
                 complete: function (results) {
-
-                
-
-                    // Dibujamos una barra por cada clase dentro del SVG
+ 
+                    spanTotal.innerHTML = results.data.length;
+ 
+                    results.data.forEach(function(pasajero) {
+                        if (pasajero.Pclass == 1) {
+                            primera = primera + 1;
+                            if (pasajero.Survived == 0) { primerosmuertos = primerosmuertos + 1; }
+                        } else if (pasajero.Pclass == 2) {
+                            segunda = segunda + 1;
+                            if (pasajero.Survived == 0) { segundosmuertos = segundosmuertos + 1; }
+                        } else {
+                            tercera = tercera + 1;
+                            if (pasajero.Survived == 0) { tercerosmuertos = tercerosmuertos + 1; }
+                        }
+                    });
+ 
+                    var escala = 892 / (primera + segunda + tercera);
+ 
+                    var p1 = primera * escala;
+                    var p2 = segunda * escala;
+                    var p3 = tercera * escala;
+ 
+                    // Gráfico 1 :3
                     grafico.innerHTML =
-                        // Primera clase (oscuro)
-                        `<rect x="0" y="0" width="${primera}" height="100" fill="#333"></rect>
-                        <text x="${primera / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${primera}</text>
-                        <text x="${primera / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#333">PRIMERA CLASE</text>` +
-
-                        // Segunda clase (gris medio)
-                        `<rect x="${primera}" y="0" width="${segunda}" height="100" fill="#666"></rect>
-                        <text x="${primera + segunda / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${segunda}</text>
-                        <text x="${primera + segunda / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#333">SEGUNDA CLASE</text>` +
-
-                        // Tercera clase (claro)
-                        `<rect x="${primera + segunda}" y="0" width="${tercera}" height="100" fill="#999"></rect>
-                        <text x="${primera + segunda + tercera / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${tercera}</text>
-                        <text x="${primera + segunda + tercera / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#333">TERCERA CLASE</text>`;
-            
-
+                        `<rect x="0" y="0" width="${p1}" height="100" fill="#333"></rect>
+                        <text x="${p1 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${primera}</text>
+                        <text x="${p1 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#333">PRIMERA CLASE</text>` +
+ 
+                        `<rect x="${p1}" y="0" width="${p2}" height="100" fill="#666"></rect>
+                        <text x="${p1 + p2 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${segunda}</text>
+                        <text x="${p1 + p2 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#333">SEGUNDA CLASE</text>` +
+ 
+                        `<rect x="${p1 + p2}" y="0" width="${p3}" height="100" fill="#999"></rect>
+                        <text x="${p1 + p2 + p3 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${tercera}</text>
+                        <text x="${p1 + p2 + p3 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#333">TERCERA CLASE</text>`;
+ 
+                    // Ggráfico 2 :3
+                    var sob1 = (primera - primerosmuertos) * (892 / primera);
+                    var mue1 = primerosmuertos * (892 / primera);
+ 
                     document.querySelector("#grafico2").innerHTML =
-    `<rect x="0" y="0" width="${primera_vive / primera * 800}" height="40" fill="#870000"></rect>
-    <text x="${primera_vive / primera * 800 / 2}" y="20" font-size="25" dominant-baseline="middle" text-anchor="middle" fill="#fff">${primera_vive}</text>
-    <text x="${primera_vive / primera * 800 / 2}" y="60" font-size="20" dominant-baseline="middle" text-anchor="middle" fill="#870000">SOBREVIVIENTES</text>` +
-
-    `<rect x="${primera_vive / primera * 800}" y="0" width="${primera_muere / primera * 800}" height="40" fill="#DE3A3A"></rect>
-    <text x="${primera_vive / primera * 800 + primera_muere / primera * 800 / 2}" y="20" font-size="25" dominant-baseline="middle" text-anchor="middle" fill="#fff">${primera_muere}</text>
-    <text x="${primera_vive / primera * 800 + primera_muere / primera * 800 / 2}" y="60" font-size="20" dominant-baseline="middle" text-anchor="middle" fill="#666">FALLECIDOS</text>`;
-
-document.querySelector("#grafico3").innerHTML =
-    `<rect x="0" y="0" width="${segunda_vive / segunda * 800}" height="40" fill="#340078"></rect>
-    <text x="${segunda_vive / segunda * 800 / 2}" y="20" font-size="25" dominant-baseline="middle" text-anchor="middle" fill="#fff">${segunda_vive}</text>
-    <text x="${segunda_vive / segunda * 800 / 2}" y="60" font-size="20" dominant-baseline="middle" text-anchor="middle" fill="#340078">SOBREVIVIENTES</text>` +
-
-    `<rect x="${segunda_vive / segunda * 800}" y="0" width="${segunda_muere / segunda * 800}" height="40" fill="#814AD9"></rect>
-    <text x="${segunda_vive / segunda * 800 + segunda_muere / segunda * 800 / 2}" y="20" font-size="25" dominant-baseline="middle" text-anchor="middle" fill="#fff">${segunda_muere}</text>
-    <text x="${segunda_vive / segunda * 800 + segunda_muere / segunda * 800 / 2}" y="60" font-size="20" dominant-baseline="middle" text-anchor="middle" fill="#814AD9">FALLECIDOS</text>`;
-
-document.querySelector("#grafico4").innerHTML =
-    `<rect x="0" y="0" width="${tercera_vive / tercera * 800}" height="40" fill="#026317"></rect>
-    <text x="${tercera_vive / tercera * 800 / 2}" y="20" font-size="25" dominant-baseline="middle" text-anchor="middle" fill="#fff">${tercera_vive}</text>
-    <text x="${tercera_vive / tercera * 800 / 2}" y="60" font-size="20" dominant-baseline="middle" text-anchor="middle" fill="#026317">SOBREVIVIENTES</text>` +
-
-    `<rect x="${tercera_vive / tercera * 800}" y="0" width="${tercera_muere / tercera * 800}" height="40" fill="#43A859"></rect>
-    <text x="${tercera_vive / tercera * 800 + tercera_muere / tercera * 800 / 2}" y="20" font-size="25" dominant-baseline="middle" text-anchor="middle" fill="#fff">${tercera_muere}</text>
-    <text x="${tercera_vive / tercera * 800 + tercera_muere / tercera * 800 / 2}" y="60" font-size="20" dominant-baseline="middle" text-anchor="middle" fill="#43A859">FALLECIDOS</text>`;
-                         } // fin de complete
-
+                        `<rect x="0" y="0" width="${sob1}" height="100" fill="#870000"></rect>
+                        <text x="${sob1 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${primera - primerosmuertos}</text>
+                        <text x="${sob1 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#870000">SOBREVIVEN</text>` +
+ 
+                        `<rect x="${sob1}" y="0" width="${mue1}" height="100" fill="#DE3A3A"></rect>
+                        <text x="${sob1 + mue1 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${primerosmuertos}</text>
+                        <text x="${sob1 + mue1 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#DE3A3A">MUEREN</text>`;
+ 
+                    // Gráfico 3 :3
+                    var sob2 = (segunda - segundosmuertos) * (892 / segunda);
+                    var mue2 = segundosmuertos * (892 / segunda);
+ 
+                    document.querySelector("#grafico3").innerHTML =
+                        `<rect x="0" y="0" width="${sob2}" height="100" fill="#340078"></rect>
+                        <text x="${sob2 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${segunda - segundosmuertos}</text>
+                        <text x="${sob2 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#340078">SOBREVIVEN</text>` +
+ 
+                        `<rect x="${sob2}" y="0" width="${mue2}" height="100" fill="#814AD9"></rect>
+                        <text x="${sob2 + mue2 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${segundosmuertos}</text>
+                        <text x="${sob2 + mue2 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#814AD9">MUEREN</text>`;
+ 
+                    // Gráfico 4 :3
+                    var sob3 = (tercera - tercerosmuertos) * (892 / tercera);
+                    var mue3 = tercerosmuertos * (892 / tercera);
+ 
+                    document.querySelector("#grafico4").innerHTML =
+                        `<rect x="0" y="0" width="${sob3}" height="100" fill="#026317"></rect>
+                        <text x="${sob3 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${tercera - tercerosmuertos}</text>
+                        <text x="${sob3 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#026317">SOBREVIVEN</text>` +
+ 
+                        `<rect x="${sob3}" y="0" width="${mue3}" height="100" fill="#43A859"></rect>
+                        <text x="${sob3 + mue3 / 2}" y="60" font-size="48" dominant-baseline="middle" text-anchor="middle" fill="#fff">${tercerosmuertos}</text>
+                        <text x="${sob3 + mue3 / 2}" y="125" font-size="18" dominant-baseline="middle" text-anchor="middle" fill="#43A859">MUEREN</text>`;
+ 
+                } // fin de complete
             }); // fin de Papa.parse
         </script>
     </body>
